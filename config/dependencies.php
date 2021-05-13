@@ -8,6 +8,8 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 return static function (ContainerBuilder $containerBuilder, array $settings) {
     $containerBuilder->addDefinitions([
@@ -27,5 +29,16 @@ return static function (ContainerBuilder $containerBuilder, array $settings) {
 
             return $logger;
         },
+
+        \Twig\Environment::class => function (ContainerInterface $c) use ($settings): Environment {
+            $loader = new Twig\Loader\FilesystemLoader((__DIR__ . '/../view'));
+            $twig = new Twig\Environment($loader, [
+                __DIR__ . '/../var/cache'
+            ]);
+            if ($settings['app_env'] === 'DEVELOPMENT') {
+                $twig->enableDebug();
+            }
+            return $twig;
+        }
     ]);
 };
